@@ -15,7 +15,7 @@ public class CompraServiceImpl implements CompraService {
 	public void realizaCompra(CompraDto compra) {
 		
 		RestTemplate client = new RestTemplate();
-	 	ResponseEntity<InfoFornecedorDto> exchange = client.exchange("http://localhost:8081/info"+ compra.getEndereco().getEstado(), HttpMethod.GET, null, InfoFornecedorDto.class);
+		ResponseEntity<InfoFornecedorDto> exchange = client.exchange("http://localhost:8081/info/"+compra.getEndereco().getEstado(), HttpMethod.GET, null, InfoFornecedorDto.class);
 		System.out.println(exchange.getBody().getEndereco());
 	}
 
