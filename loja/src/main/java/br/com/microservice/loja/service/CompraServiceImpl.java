@@ -9,21 +9,19 @@ import org.springframework.web.client.RestTemplate;
 
 import br.com.microservice.loja.model.dto.CompraDto;
 import br.com.microservice.loja.model.dto.InfoFornecedorDto;
+import br.com.microservice.loja.service.feignClients.FornecedorFeignClient;
 
 @Service
 public class CompraServiceImpl implements CompraService {
 
-	private @Autowired RestTemplate client;
-	private @Autowired DiscoveryClient eurekaClient;
+	private @Autowired FornecedorFeignClient fornecedorFeignClient;
 	
 	@Override
 	public void realizaCompra(CompraDto compra) {
 				
-		ResponseEntity<InfoFornecedorDto> exchange = client.exchange("http://fornecedor:8081/info/"+compra.getEndereco().getEstado(), HttpMethod.GET, null, InfoFornecedorDto.class);
+		InfoFornecedorDto info = fornecedorFeignClient.getInfoPorEstado(compra.getEndereco().getEstado());
 		
-		eurekaClient.getInstances("fornecedor").stream().forEach(c -> { System.out.println("localhost: "+c.getPort());});
-		
-		System.out.println(exchange.getBody().getEndereco());
+		System.out.println(info.getEndereco());
 	}
 
 }
