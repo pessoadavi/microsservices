@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.microservice.loja.model.dto.CompraDto;
+import br.com.microservice.loja.model.entity.CompraEntity;
 import br.com.microservice.loja.service.CompraService;
 import br.com.microservice.loja.service.CompraService;
 
@@ -19,7 +20,7 @@ public class CompraController {
 	private @Autowired CompraService compraService;
 	
 	@PostMapping("")
-	public void realizarCompra(@RequestBody CompraDto compra) {
-		compraService.realizaCompra(compra);
+	public CompraEntity realizarCompra(@RequestBody CompraDto compra) {
+	return compraService.realizaCompra(compra);
 	}
 }
