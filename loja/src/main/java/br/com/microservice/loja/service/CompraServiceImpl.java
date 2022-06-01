@@ -1,5 +1,7 @@
 package br.com.microservice.loja.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,15 @@ public class CompraServiceImpl implements CompraService {
 
 	private @Autowired FornecedorFeignClient fornecedorFeignClient;
 	
+	private static final Logger LOG = LoggerFactory.getLogger(CompraServiceImpl.class);
+	
 	@Override
 	public CompraEntity realizaCompra(CompraDto compra) {
 				
-		InfoFornecedorDto info = fornecedorFeignClient.getInfoPorEstado(compra.getEndereco().getEstado());
+		LOG.info("Buscando informações do fornecedor {}.", compra.getEndereco().getEstado());
+		InfoFornecedorDto info = fornecedorFeignClient.getInfoPorEstado(compra.getEndereco().getEstado());		
 		
+		LOG.info("Realizando pedido.");
 		InfoPedidoDto pedido = fornecedorFeignClient.realizaPedido(compra.getItens());
 		
 		System.out.println(info.getEndereco());
