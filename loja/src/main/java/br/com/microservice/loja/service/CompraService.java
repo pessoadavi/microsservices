@@ -6,4 +6,7 @@ import br.com.microservice.loja.model.entity.CompraEntity;
 public interface CompraService {
 
 	CompraEntity realizaCompra(CompraDto compra);
+
+	CompraEntity realizaCompraFallBack(CompraDto compra);
+
 }
