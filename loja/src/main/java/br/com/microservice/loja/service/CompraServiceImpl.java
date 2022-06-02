@@ -1,5 +1,7 @@
 package br.com.microservice.loja.service;
 
+import java.time.LocalDate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,17 +10,21 @@ import org.springframework.stereotype.Service;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import br.com.microservice.loja.model.dto.CompraDto;
+import br.com.microservice.loja.model.dto.InfoEntregaDto;
 import br.com.microservice.loja.model.dto.InfoFornecedorDto;
 import br.com.microservice.loja.model.dto.InfoPedidoDto;
+import br.com.microservice.loja.model.dto.InfoVoucherDto;
 import br.com.microservice.loja.model.entity.CompraEntity;
 import br.com.microservice.loja.repository.CompraRepository;
 import br.com.microservice.loja.service.feignClients.FornecedorFeignClient;
+import br.com.microservice.loja.service.feignClients.TransportadorFeignClient;
 
 @Service
 public class CompraServiceImpl implements CompraService {
 
 	private @Autowired CompraRepository compraRepository;
 	private @Autowired FornecedorFeignClient fornecedorFeignClient;
+	private @Autowired TransportadorFeignClient transportadorFeignClient; 
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CompraServiceImpl.class);
 	
@@ -27,6 +33,8 @@ public class CompraServiceImpl implements CompraService {
 	public CompraEntity getCompraById(Long id) {
 		return compraRepository.findById(id).orElse(new CompraEntity());
 	}
+	
+	
 	
 	@Override
 	@HystrixCommand(fallbackMethod = "realizaCompraFallBack", threadPoolKey = "realizaCompraThreadPool")
@@ -38,19 +46,25 @@ public class CompraServiceImpl implements CompraService {
 		LOG.info("Realizando pedido.");
 		InfoPedidoDto pedido = fornecedorFeignClient.realizaPedido(compra.getItens());
 		
+		InfoEntregaDto entregaDto = new InfoEntregaDto();
+		
+		entregaDto.setPedidoId(pedido.getId());
+		entregaDto.setDataParaEntrega(LocalDate.now().plusDays(pedido.getTempoDePreparo()));
+		entregaDto.setEnderecoOrigem(info.getEndereco().toString());
+		entregaDto.setEnderecoDestino(compra.getEndereco().toString());
+		
+		InfoVoucherDto voucher = transportadorFeignClient.reservaEntrega(entregaDto);
+
+		
 		System.out.println(info.getEndereco());
 	
 		CompraEntity compraSalva = new CompraEntity();
 		compraSalva.setPedidoId(pedido.getId());
 		compraSalva.setTempoDePreparo(pedido.getTempoDePreparo());
 		compraSalva.setEnderecoDestino(compra.getEndereco().toString());
-		
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		compraSalva.setVoucher(voucher.getNumero());
 		compraRepository.saveAndFlush(compraSalva);
+		
 		return compraSalva;
 	}
 
