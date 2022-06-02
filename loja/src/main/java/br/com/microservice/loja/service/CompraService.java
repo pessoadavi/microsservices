@@ -8,5 +8,7 @@ public interface CompraService {
 	CompraEntity realizaCompra(CompraDto compra);
 
 	CompraEntity realizaCompraFallBack(CompraDto compra);
+	
+	CompraEntity getCompraById(Long id);
 
 }

@@ -11,17 +11,25 @@ import br.com.microservice.loja.model.dto.CompraDto;
 import br.com.microservice.loja.model.dto.InfoFornecedorDto;
 import br.com.microservice.loja.model.dto.InfoPedidoDto;
 import br.com.microservice.loja.model.entity.CompraEntity;
+import br.com.microservice.loja.repository.CompraRepository;
 import br.com.microservice.loja.service.feignClients.FornecedorFeignClient;
 
 @Service
 public class CompraServiceImpl implements CompraService {
 
+	private @Autowired CompraRepository compraRepository;
 	private @Autowired FornecedorFeignClient fornecedorFeignClient;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CompraServiceImpl.class);
 	
 	@Override
-	@HystrixCommand(fallbackMethod = "realizaCompraFallBack")
+	@HystrixCommand(threadPoolKey = "getCompraByIdThreadPool")
+	public CompraEntity getCompraById(Long id) {
+		return compraRepository.findById(id).orElse(new CompraEntity());
+	}
+	
+	@Override
+	@HystrixCommand(fallbackMethod = "realizaCompraFallBack", threadPoolKey = "realizaCompraThreadPool")
 	public CompraEntity realizaCompra(CompraDto compra) {
 				
 		LOG.info("Buscando informações do fornecedor {}.", compra.getEndereco().getEstado());
@@ -42,7 +50,7 @@ public class CompraServiceImpl implements CompraService {
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-		
+		compraRepository.saveAndFlush(compraSalva);
 		return compraSalva;
 	}
 
