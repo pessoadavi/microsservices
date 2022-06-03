@@ -46,22 +46,22 @@ public class CompraServiceImpl implements CompraService {
 		LOG.info("Realizando pedido.");
 		InfoPedidoDto pedido = fornecedorFeignClient.realizaPedido(compra.getItens());
 		
-		InfoEntregaDto entregaDto = new InfoEntregaDto();
+		System.out.println(info.getEndereco());
 		
+		InfoEntregaDto entregaDto = new InfoEntregaDto();
 		entregaDto.setPedidoId(pedido.getId());
-		entregaDto.setDataParaEntrega(LocalDate.now().plusDays(pedido.getTempoDePreparo()));
-		entregaDto.setEnderecoOrigem(info.getEndereco().toString());
+		LocalDate time = LocalDate.now().plusDays(pedido.getTempoDePreparo());
+		entregaDto.setDataParaEntrega(time);
+		entregaDto.setEnderecoOrigem(info.getEndereco());
 		entregaDto.setEnderecoDestino(compra.getEndereco().toString());
 		
-		InfoVoucherDto voucher = transportadorFeignClient.reservaEntrega(entregaDto);
-
-		
-		System.out.println(info.getEndereco());
+		InfoVoucherDto voucher = transportadorFeignClient.reservaEntrega(entregaDto);		
 	
 		CompraEntity compraSalva = new CompraEntity();
 		compraSalva.setPedidoId(pedido.getId());
 		compraSalva.setTempoDePreparo(pedido.getTempoDePreparo());
 		compraSalva.setEnderecoDestino(compra.getEndereco().toString());
+		compraSalva.setDataParaEntrega(voucher.getPrevisaoParaEntrega());
 		compraSalva.setVoucher(voucher.getNumero());
 		compraRepository.saveAndFlush(compraSalva);
 		
