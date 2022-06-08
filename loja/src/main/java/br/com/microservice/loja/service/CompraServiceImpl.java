@@ -55,9 +55,7 @@ public class CompraServiceImpl implements CompraService {
 		compraSalva.setPedidoId(pedido.getId());
 		compraSalva.setTempoDePreparo(pedido.getTempoDePreparo());
 		compraRepository.saveAndFlush(compraSalva);
-		
-		if(1==1) throw new RuntimeException();
-		
+				
 		InfoEntregaDto entregaDto = new InfoEntregaDto();
 		entregaDto.setPedidoId(pedido.getId());
 		LocalDate time = LocalDate.now().plusDays(pedido.getTempoDePreparo());
