@@ -23,7 +23,8 @@ public class CompraController {
 	
 	@PostMapping("")
 	public CompraEntity realizarCompra(@RequestBody CompraDto compra) {
-	return compraService.realizaCompra(compra);
+		
+		return compraService.realizaCompra(compra);
 	}
 	
 	@GetMapping("/{id}")
